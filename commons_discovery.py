@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
+
 """Roadside Finds: Wikimedia Commons discovery prototype.
 
 Queries the Wikimedia Commons API for file search results and extracts
-metadata for review-only purposes.  Never downloads or publishes files.
+metadata for review-only purposes. Never downloads or publishes files.
 
 Usage:
+
     python commons_discovery.py
-    python commons_discovery.py --query "construction" --limit 10
+    python commons_discovery.py --query "campervan conversion" --limit 10
     python commons_discovery.py --output results.json
+
 """
 
 from __future__ import annotations
@@ -21,11 +24,14 @@ import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional
 
+
 USER_AGENT = (
     "RoadsideFindsResearch/0.1 (non-commercial research; "
     "contact: repository owner via GitHub)"
 )
+
 API_BASE = "https://commons.wikimedia.org/w/api.php"
+
 TIMEOUT = 30
 
 
@@ -50,7 +56,6 @@ def _fetch(params: Dict[str, str]) -> Dict[str, Any]:
         print("[error] failed to decode JSON response", file=sys.stderr)
         return {}
 
-
 def _strip_html(text: Optional[str]) -> str:
     """Safely strip HTML markup from a metadata value."""
     if not text:
@@ -73,11 +78,10 @@ def _parse_image_info(imginfo: Dict[str, Any]) -> Dict[str, Any]:
         "mime": mime,
         "width": dimensions.get("width"),
         "height": dimensions.get("height"),
-        "size": entry.get("size"),           # file size in bytes
+        "size": entry.get("size"),  # file size in bytes
         "timestamp": entry.get("timestamp"),
         "user": entry.get("user"),
     }
-
 
 def _parse_extmetadata(extmeta: List[Dict]) -> Dict[str, str]:
     """Extract key metadata fields from the extmetadata array."""
@@ -90,7 +94,6 @@ def _parse_extmetadata(extmeta: List[Dict]) -> Dict[str, str]:
         meta[key] = value
     return meta
 
-
 def _build_record(
     page: Dict[str, Any],
     image_info: Dict[str, Any],
@@ -99,17 +102,14 @@ def _build_record(
     """Build a single output record."""
     title = page.get("title", "")
     ns = page.get("ns", 0)
-
     # Direct file URL
     filename = page.get("title", "")
     if ns == 6:  # File namespace on Commons
         file_url = f"https://commons.wikimedia.org/wiki/Special:FilePath/{urllib.parse.quote(filename)}"
     else:
         file_url = ""
-
     # Description page URL
     desc_url = f"https://commons.wikimedia.org/wiki/{urllib.parse.quote(filename)}"
-
     return {
         "title": title,
         "description_url": desc_url,
@@ -138,15 +138,17 @@ def _build_record(
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Roadside Finds – Wikimedia Commons discovery prototype."
+        description="Roadside Finds – Wikimedia Commons discovery prototype. "
+        "Single-query prototype only (not multi-query).",
     )
     parser.add_argument(
         "--query",
-        default="truck",
-        help="Search term for Commons files (default: truck)",
+        default="van life",
+        help='Search term for Commons files (default: "van life"). '
+        'Examples: "campervan conversion", "van build", "van interior", '
+        '"vanlife camping", "off-grid van solar", "vehicle dwelling".',
     )
     parser.add_argument(
         "--limit",
@@ -172,11 +174,13 @@ def main() -> None:
     }
     search_data = _fetch(search_params)
     pages = search_data.get("query", {}).get("search", [])
+
     if not pages:
         print(json.dumps({"message": "no results found", "query": args.query}, indent=2))
         return
 
     titles = [p["title"] for p in pages]
+
     # Step 2: imageinfo + extmetadata
     imginfo_params = {
         "action": "query",
@@ -190,19 +194,24 @@ def main() -> None:
 
     records: List[Dict[str, Any]] = []
     pages_dict = imginfo_data.get("query", {}).get("pages", {})
+
     for page in pages:
         title = page["title"]
         page_obj = pages_dict.get(str(title))  # API uses numeric page IDs
+
         # Find the matching page by title
         matching_page = None
         for pid, pobj in pages_dict.items():
             if pobj.get("title") == title:
                 matching_page = pobj
                 break
+
         if not matching_page:
             continue
+
         imginfo = matching_page.get("imageinfo", [])
         extmeta = matching_page.get("extmetadata", [])
+
         rec = _build_record(
             matching_page,
             _parse_image_info(imginfo),
@@ -220,7 +229,8 @@ def main() -> None:
             print(f"[ok] written to {args.output}")
         except OSError as exc:
             print(f"[error] cannot write {args.output}: {exc}", file=sys.stderr)
-            json_str  # fall through to stdout
+            json_str # fall through to stdout
+
     print(json_str)
 
 
