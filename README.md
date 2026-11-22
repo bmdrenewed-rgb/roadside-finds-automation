@@ -8,10 +8,10 @@ This repository supports an automated workflow for **Roadside Finds**, a TikTok 
 
 - **Safety First**: Only use individually verified, reusable assets (photos, clips, text snippets). Every asset must be traceable to its source before use.
 - **Attribution Required**: For each asset, record:
-  - Source URL
-  - Creator name
-  - License name
-  - License URL
+  + Source URL
+  + Creator name
+  + License name
+  + License URL
 - **No Publishing Before Review**: All scheduled content must pass a manual review step before being posted to TikTok.
 - **Never Commit Secrets**: Tokens, API keys, passwords, and credentials must never be committed to this repository. Use environment variables and `.env` files (which are gitignored).
 - **Scheduler**: [Metricool](https://metricool.com/) is the intended scheduling tool for publishing content to TikTok on a consistent cadence.
@@ -19,13 +19,11 @@ This repository supports an automated workflow for **Roadside Finds**, a TikTok 
 ### Account Details
 
 | Field | Value |
-|-------|-------|
+|---|---|
 | TikTok Account | RoadsideFinds |
 | Timezone | America/New_York |
 
 ## Getting Started
-
-This is the initial commit. The first prototype focuses on **Wikimedia Commons discovery and metadata extraction** to identify publicly licensed images that may be suitable for the Roadside Finds feed.
 
 ### Installation
 
@@ -35,7 +33,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Running the Prototype Script
+### Running the Prototype
 
 ```bash
 # Default search (truck) with 5 results
@@ -48,7 +46,7 @@ python commons_discovery.py --query "construction equipment" --limit 10
 python commons_discovery.py --output results.json
 ```
 
-### `commons_discovery.py` — Review-Only Prototype
+### `commons_discovery.py`
 
 This script queries the **Wikimedia Commons API** (`https://commons.wikimedia.org/w/api.php`) to search for files and extract metadata. It is a **research prototype only** with the following characteristics:
 
@@ -58,18 +56,33 @@ This script queries the **Wikimedia Commons API** (`https://commons.wikimedia.or
 - **Error handling**: Network and API errors are handled gracefully; missing metadata is reported as `null` rather than causing crashes.
 - **Output**: JSON to stdout or an optional `--output` file path.
 
-### Dependencies
+## Live Discovery Test Results
 
-See `requirements.txt` for the minimal first-pass library.
+A live API test was conducted on **2026-11-22** using the search term `filetype:video truck`.
 
-### Next Tasks
+| Metric | Value |
+|---|---|
+| Results Returned | 5 |
+| Results Approved | 0 |
+| File Format | All WebM |
+| Dimensions Available | None (missing from all results) |
 
-1. ✅ Initial repository setup (README, .gitignore, requirements.txt)
-2. ✅ First prototype: `commons_discovery.py` — Wikimedia Commons discovery
-3. 🔲 Test against live Commons API
-4. 🔲 Inspect licenses individually
-5. 🔲 Add unit tests
-6. 🔲 Build video editing pipeline
+**Key Discovery:** The keyword `truck` is too broad — it matches railway bogie trucks (irrelevant), politically sensitive protest footage (off-topic), and military content with unclear provenance. **Query relevance needs improvement.**
+
+Full review details are documented in [`LICENSE_REVIEW.md`](LICENSE_REVIEW.md).
+
+### Updated Next Tasks
+
+- [x] Initial repository setup (README, .gitignore, requirements.txt)
+- [x] First prototype: `commons_discovery.py` — Wikimedia Commons discovery
+- [x] Test against live Commons API
+- [ ] Improve query relevance (add specific keywords, use Commons categories)
+- [ ] Improve metadata/dimensions extraction (dimensions/width/height were absent)
+- [ ] Inspect licenses individually
+- [ ] Add unit tests
+- [ ] Build review queue for assets
+- [ ] Build video editing pipeline
+- [ ] Create a video from **only** an approved asset
 
 ## License
 
