@@ -1,0 +1,48 @@
+# Secrets and credentials
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+config_local.py
+
+# Python virtual environments
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Generated media
+media/
+uploads/
+*.mp4
+*.mp3
+*.jpg
+*.png
+*.gif
+*.webm
+*.mov
+
+# Caches
+__pycache__/
+*.pyc
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
